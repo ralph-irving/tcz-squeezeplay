@@ -1,0 +1,45 @@
+#!/bin/bash
+SQUEEZEPLAY=squeezeplay
+TOPDIR=`pwd`
+BUILDDIR=${TOPDIR}/sp-build
+OUTPUT=${BUILDDIR}/opt/${SQUEEZEPLAY}
+TCZ=${TOPDIR}/${SQUEEZEPLAY}.tcz
+
+if [ -d $BUILDDIR ]; then
+	rm -rf $BUILDDIR
+fi
+
+mkdir -p $OUTPUT || exit 1
+
+tar -x -C $OUTPUT -z -f $HOME/source/squeezeplay/build/squeezeplay-fb-7.8.0-681-armhf.tgz
+
+cp -pr $HOME/source/tcz/jivelite/DisplayOff $OUTPUT/share/jive/applets/
+
+cd $OUTPUT || exit 1
+
+rm -f bin/{cjpeg,djpeg,freetype-config,jpegtran,libpng12-config,libpng-config,lprof,lua,luac,rdjpgcom,sdl-config,ts_calibrate,ts_harvest,ts_print,ts_print_raw,ts_test,wrjpgcom,xmlwf,squeezeplay.sh}
+rm -rf etc
+rm -rf include
+rm -rf man
+rm -rf share/{aclocal,doc,man}
+rm -rf lib/{pkgconfig,ts}
+find lib -type f -name '*\.a' -exec rm {} \;
+find lib -type f -name '*\.la' -exec rm {} \;
+rm -f lib/libpng.la
+rm -f lib/libts*
+
+find lib -type f -name '*so*' -exec patchelf --set-rpath "/opt/squeezeplay/lib" {} \;
+patchelf --set-rpath "/opt/squeezeplay/lib:/usr/local/lib" lib/libSDL-1.2.so.0.11.4
+patchelf --set-rpath "/opt/squeezeplay/lib:/usr/local/lib" lib/libSDL_gfx.so.13.9.1
+find bin -type f -exec patchelf --set-rpath "/opt/squeezeplay/lib" {} \;
+find bin -type f -exec strip --strip-unneeded {} \;
+cp -p $TOPDIR/${SQUEEZEPLAY}.sh bin/
+
+cd $TOPDIR
+
+if [ -f $TCZ ]; then
+        rm $TCZ
+fi
+
+mksquashfs sp-build $TCZ -all-root -no-progress
+md5sum `basename $TCZ` > ${TCZ}.md5.txt 

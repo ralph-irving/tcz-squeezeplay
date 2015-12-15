@@ -1,0 +1,33 @@
+Index: share/jive/applets/SetupAppletInstaller/SetupAppletInstallerApplet.lua
+===================================================================
+--- share/jive/applets/SetupAppletInstaller/SetupAppletInstallerApplet.lua	(revision 681)
++++ share/jive/applets/SetupAppletInstaller/SetupAppletInstallerApplet.lua	(working copy)
+@@ -518,23 +518,12 @@
+ 	end
+ 	self:storeSettings()
+ 
+-	if lfs.attributes("/bin/busybox") ~= nil then
+-		self.animatelabel:setValue(self:string("RESTART_JIVE"))
+-		-- two second delay
+-		local t = Framework:getTicks()
+-		while (t + 2000) > Framework:getTicks() do
+-			Task:yield(true)
+-		end
+-		log:info("RESTARTING JIVE...")
+-		appletManager:callService("reboot")
+-	else
+-		self.animatewindow:hide()
+-		if self.appletwindow then
+-			self.appletwindow:hide()
+-		end
+-		self.window:removeWidget(self.menu)
+-		self.window:addWidget(Textarea("help_text", self:string("RESTART_APP")))
++	self.animatewindow:hide()
++	if self.appletwindow then
++		self.appletwindow:hide()
+ 	end
++	self.window:removeWidget(self.menu)
++	self.window:addWidget(Textarea("help_text", self:string("RESTART_APP")))
+ end
+ 
+ 

@@ -17,6 +17,10 @@ cp -pr $HOME/source/tcz/jivelite/DisplayOff $OUTPUT/share/jive/applets/
 
 cd $OUTPUT || exit 1
 
+patch -p0 -i$OUTPUT/../../../RemoveAppletInstallerReboot.patch || exit 1
+
+cp -p $OUTPUT/share/jive/applets/SetupWallpaper/wallpaper/pcp_black.png $OUTPUT/share/jive/jive/splash.png || exit 1
+
 rm -f bin/{cjpeg,djpeg,freetype-config,jpegtran,libpng12-config,libpng-config,lprof,lua,luac,rdjpgcom,sdl-config,ts_calibrate,ts_harvest,ts_print,ts_print_raw,ts_test,wrjpgcom,xmlwf,squeezeplay.sh}
 rm -rf etc
 rm -rf include

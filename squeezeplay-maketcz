@@ -11,17 +11,24 @@ fi
 
 mkdir -p $OUTPUT || exit 1
 
-tar -x -C $OUTPUT -z -f $HOME/source/squeezeplay/build/squeezeplay-fb-7.8.0-681-armhf.tgz
+tar -x -C $OUTPUT -z -f $HOME/source/squeezeplay/build/squeezeplay-7.8.0-984.tgz
 
-cp -pr $HOME/source/tcz/jivelite/DisplayOff $OUTPUT/share/jive/applets/
+cp -pr $HOME/source/picoreplayer/tcz/jivelite/DisplayOff $OUTPUT/share/jive/applets/
+cp -pr $HOME/source/picoreplayer/tcz/jivelite/piCorePlayer $OUTPUT/share/jive/applets/
+
+cd $OUTPUT/share/jive/applets/piCorePlayer
+patch -p0 -i$OUTPUT/../../../squeezeplay-picoreplayermeta.patch || exit 1
 
 cd $OUTPUT || exit 1
 
-patch -p0 -i$OUTPUT/../../../RemoveAppletInstallerReboot.patch || exit 1
+patch -p0 -i$OUTPUT/../../../squeezeplay-removeappletinstallerreboot.patch || exit 1
+patch -p0 -i$OUTPUT/../../../squeezeplay-defaultjogglerskin.patch || exit 1
 
-cp -p $OUTPUT/share/jive/applets/SetupWallpaper/wallpaper/pcp_black.png $OUTPUT/share/jive/jive/splash.png || exit 1
+rm share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/{vu_analog_25seq_b.png,vu_analog_25seq_w.png} || exit 1
+cp -p $HOME/source/picoreplayer/tcz/jivelite/vu_analog_25seq_k.png share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_w.png || exit 1
+cp -p $HOME/source/picoreplayer/tcz/jivelite/pcp.png $OUTPUT/share/jive/jive/splash.png || exit 1
 
-rm -f bin/{cjpeg,djpeg,freetype-config,jpegtran,libpng12-config,libpng-config,lprof,lua,luac,rdjpgcom,sdl-config,ts_calibrate,ts_harvest,ts_print,ts_print_raw,ts_test,wrjpgcom,xmlwf,squeezeplay.sh}
+rm -f bin/{cjpeg,djpeg,freetype-config,jpegtran,libpng12-config,libpng-config,lprof,lua,luac,rdjpgcom,sdl-config,ts_*,wrjpgcom,xmlwf,squeezeplay.sh}
 rm -rf etc
 rm -rf include
 rm -rf man

@@ -1,0 +1,43 @@
+--- piCorePlayerApplet.lua.orig
++++ piCorePlayerApplet.lua
+@@ -121,23 +121,23 @@
+         is_checked = false
+     end
+ 
+-    menu:addItem({ text = self:string("MENU_ENABLE_POWER_ON_BUTTON_WHEN_OFF"), 
+-            style = "item_choice",
+-            check = Checkbox(
+-                "checkbox",
+-                function(object, isSelected)
+-                    self:getSettings()["pcp_enable_power_on_button_when_off"] = isSelected
+-                    self:storeSettings()
+-                end,
+-                is_checked
+-                )
+-            })
+-
+-    menu:addItem({ text = self:string("MENU_WAKE_ON_LAN"),
+-            callback = function(event, menuItem)
+-                self:menuWOL(menuItem)
+-            end })
+-
++--    menu:addItem({ text = self:string("MENU_ENABLE_POWER_ON_BUTTON_WHEN_OFF"), 
++--            style = "item_choice",
++--            check = Checkbox(
++--                "checkbox",
++--                function(object, isSelected)
++--                    self:getSettings()["pcp_enable_power_on_button_when_off"] = isSelected
++--                    self:storeSettings()
++--                end,
++--                is_checked
++--                )
++--            })
++--
++--    menu:addItem({ text = self:string("MENU_WAKE_ON_LAN"),
++--            callback = function(event, menuItem)
++--                self:menuWOL(menuItem)
++--            end })
++--
+     menu:addItem({ text = self:string("MENU_SAVE_SETTINGS"),
+             callback = function(event, menuItem)
+                 self:saveToSDCard(menuItem)

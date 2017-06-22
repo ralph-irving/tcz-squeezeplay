@@ -18,6 +18,7 @@ cp -pr $HOME/source/picoreplayer/tcz/jivelite/piCorePlayer $OUTPUT/share/jive/ap
 
 cd $OUTPUT/share/jive/applets/piCorePlayer
 patch -p0 -i$OUTPUT/../../../squeezeplay-picoreplayermeta.patch || exit 1
+patch -p0 -i$OUTPUT/../../../squeezeplay-picoreplayerapplet.patch || exit 1
 
 cd $OUTPUT || exit 1
 

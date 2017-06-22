@@ -12,7 +12,7 @@ INC_DIR=$INSTALL_DIR/include
 ## Start up
 export LD_LIBRARY_PATH=$LIB_DIR:$LD_LIBRARY_PATH
 export LD_INCLUDE_PATH=$INC_DIR:$LD_INCLUDE_PATH
-export PATH=$PATH:$INSTALL_DIR/bin:/usr/sbin
+export PATH=$PATH:$INSTALL_DIR/bin:/usr/sbin:/sbin
 
 #
 # ALSA
@@ -33,6 +33,11 @@ export PATH=$PATH:$INSTALL_DIR/bin:/usr/sbin
 #
 export SDL_VIDEO_ALLOW_SCREENSAVER=1
 #
+# Define custom JogglerSkin size
+#
+# export JL_SCREEN_WIDTH=800
+# export JL_SCREEN_HEIGHT=480
+
 eventno=$(cat /proc/bus/input/devices | awk '/FT5406 memory based driver/{for(a=0;a>=0;a++){getline;{if(/mouse/==1){ print $NF;exit 0;}}}}')
 
 export HOME=/home/tc

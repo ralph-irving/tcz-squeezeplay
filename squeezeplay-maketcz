@@ -3,7 +3,8 @@ SQUEEZEPLAY=squeezeplay
 TOPDIR=`pwd`
 BUILDDIR=${TOPDIR}/sp-build
 OUTPUT=${BUILDDIR}/opt/${SQUEEZEPLAY}
-TCZ=${TOPDIR}/${SQUEEZEPLAY}.tcz
+TCZ=${TOPDIR}/pcp-${SQUEEZEPLAY}.tcz
+TCZINFO=${TCZ}.info
 
 if [ -d $BUILDDIR ]; then
 	rm -rf $BUILDDIR
@@ -11,7 +12,7 @@ fi
 
 mkdir -p $OUTPUT || exit 1
 
-tar -x -C $OUTPUT -z -f $HOME/source/squeezeplay/build/squeezeplay-7.8.0-984.tgz
+tar -x -C $OUTPUT -f ${TOPDIR}/squeezeplay-7.8.0.tgz
 
 cp -pr $HOME/source/picoreplayer/tcz/jivelite/DisplayOff $OUTPUT/share/jive/applets/
 cp -pr $HOME/source/picoreplayer/tcz/jivelite/piCorePlayer $OUTPUT/share/jive/applets/
@@ -29,8 +30,8 @@ rm share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/{vu_analog_25seq_b.p
 cp -p $HOME/source/picoreplayer/tcz/jivelite/vu_analog_25seq_k.png share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_w.png || exit 1
 cp -p $HOME/source/picoreplayer/tcz/jivelite/pcp.png $OUTPUT/share/jive/jive/splash.png || exit 1
 
-cp -p $OUTPUT/../../../NewFont.ttf share/jive/fonts/FreeSans.ttf
-cp -p $OUTPUT/../../../NewBoldFont.ttf share/jive/fonts/FreeSansBold.ttf
+# cp -p $OUTPUT/../../../NewFont.ttf share/jive/fonts/FreeSans.ttf
+# cp -p $OUTPUT/../../../NewBoldFont.ttf share/jive/fonts/FreeSansBold.ttf
 
 rm -f bin/{cjpeg,djpeg,freetype-config,jpegtran,libpng12-config,libpng-config,lprof,lua,luac,rdjpgcom,sdl-config,ts_*,wrjpgcom,xmlwf,squeezeplay.sh}
 rm -rf etc
@@ -57,4 +58,15 @@ if [ -f $TCZ ]; then
 fi
 
 mksquashfs sp-build $TCZ -all-root -no-progress
-md5sum `basename $TCZ` > ${TCZ}.md5.txt 
+md5sum `basename $TCZ` > ${TCZ}.md5.txt
+
+echo -e "Title:\t\tpcp-$SQUEEZEPLAY.tcz" > $TCZINFO
+echo -e "Description:\tCommunity squeezebox controller and player." >> $TCZINFO
+echo -e "Version:\t$(strings $OUTPUT/bin/jive | grep 7\.8\.0)" >> $TCZINFO
+echo -e "Authors:\tSee About in advanced settings, Ralph Irving, Michael Herger" >> $TCZINFO
+echo -e "Original-site:\thttps://github.com/ralph-irving/squeezeplay.git" >> $TCZINFO
+echo -e "Copying-policy:\tBSD" >> $TCZINFO
+echo -e "Size:\t\t$(ls -lk pcp-$SQUEEZEPLAY.tcz | awk '{print $5}')k" >> $TCZINFO
+echo -e "Extension_by:\tpiCorePlayer team: https://sites.google.com/site/picoreplayer" >> $TCZINFO
+echo -e "\t\tCompiled for piCore 7.x" >> $TCZINFO
+

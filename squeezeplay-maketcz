@@ -27,6 +27,7 @@ patch -p0 -i$OUTPUT/../../../squeezeplay-removeappletinstallerreboot.patch || ex
 patch -p0 -i$OUTPUT/../../../squeezeplay-defaultjogglerskin.patch || exit 1
 
 rm share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/{vu_analog_25seq_b.png,vu_analog_25seq_w.png} || exit 1
+rm -rf share/jive/applets/BlankScreen || exit 1
 cp -p $HOME/source/picoreplayer/tcz/jivelite/vu_analog_25seq_k.png share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_w.png || exit 1
 cp -p $HOME/source/picoreplayer/tcz/jivelite/pcp.png $OUTPUT/share/jive/jive/splash.png || exit 1
 
@@ -69,4 +70,3 @@ echo -e "Copying-policy:\tBSD" >> $TCZINFO
 echo -e "Size:\t\t$(ls -lk pcp-$SQUEEZEPLAY.tcz | awk '{print $5}')k" >> $TCZINFO
 echo -e "Extension_by:\tpiCorePlayer team: https://sites.google.com/site/picoreplayer" >> $TCZINFO
 echo -e "\t\tCompiled for piCore 7.x" >> $TCZINFO
-

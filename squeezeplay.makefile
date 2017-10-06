@@ -9,15 +9,9 @@
 # sudo apt-get install libasound2-dev
 # sudo apt-get install libreadline-gplv2-dev (armhf) / libreadline-dev (armel)
 #
-# Checkout the touchscreen library and run autoconf.
+# Checkout the touchscreen library.
 #
 # svn checkout https://github.com/ralph-irving/tcz-libts.git/trunk/libts-1.0
-# cd libts-1.0
-# ./autogen.sh
-#
-# Apply the patch to use cjson instead of json
-#
-# patch -p1 -i squeezeplay-lua-cjson.patch from the src/ directory.
 #
 # Need to uncomment the PATH line which includes /usr/sbin in squeezeplay.sh for the arp command
 #
@@ -32,7 +26,7 @@ export BUILD_TOP=$(BASE_DIR)build/linux
 DESTDIR=${BUILD_TOP}
 export PREFIX=${DESTDIR}
 
-export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -s -O3 -fPIC -march=armv6 -mfloat-abi=hard -mfpu=vfp
+export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -s -O2 -fPIC -march=armv6 -mfloat-abi=hard -mfpu=vfp
 export LDFLAGS=-s -L${PREFIX}/lib
 
 export TOOLPATH = $(shell dirname `which gcc`)
@@ -108,7 +102,7 @@ libjpeg: jpeg-6b/Makefile
 
 # tslib
 libts-1.0/Makefile:
-	cd libts-1.0; ./configure --prefix=${PREFIX} --enable-shared=yes --enable-static=no
+	cd libts-1.0; ./autogen.sh; ./configure --prefix=${PREFIX} --enable-shared=yes --enable-static=no
 
 tslib: libts-1.0/Makefile
 	cd libts-1.0; make && make install
@@ -278,7 +272,9 @@ squeezeplay/Makefile:
 	cd squeezeplay; SDL_CONFIG=${SDL_CONFIG} ./configure ${ENABLE_SPPRIVATE} ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
 
 squeezeplay: squeezeplay/Makefile
+	patch -p1 -i squeezeplay-lua-cjson.patch
 	cd squeezeplay; make && make install
+	patch -p1 -R -i squeezeplay-lua-cjson.patch
 
 squeezeplay_desktop/Makefile:
 	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
@@ -339,7 +335,7 @@ clean:
 	-cd freetype-2.1.10; make distclean
 	-cd libpng-1.2.32; make distclean
 	-cd jpeg-6b; make distclean
-	-cd libts-1.0; make distclean
+	-cd libts-1.0; make distclean; rm -f Makefile
 	-cd SDL-1.2.15; make distclean; rm -f include/SDL_config.h sdl.pc;
 	-cd SDL_image-1.2.5; make distclean
 	-cd SDL_ttf-2.0.8; make distclean

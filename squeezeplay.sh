@@ -20,7 +20,7 @@ export PATH=$PATH:$INSTALL_DIR/bin:/usr/sbin:/sbin
 # Supported sample sizes 0=autodetect, default=16
 # "<0|16|24|24_3|32>"
 #
-# export USEALSASAMPLESIZE=16
+export USEALSASAMPLESIZE=0
 # export USEALSADEVICE=default
 # export USEALSACAPTURE=default
 # export USEALSAEFFECTS=null

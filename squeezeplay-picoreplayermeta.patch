@@ -1,11 +1,11 @@
---- piCorePlayerMeta.lua	2017-06-16 12:06:58.263145000 -0400
-+++ piCorePlayerMeta.lua	2017-06-16 12:09:56.143526000 -0400
-@@ -37,7 +37,7 @@
+--- piCorePlayerMeta.lua.orig	2017-06-15 10:45:45.000000000 -0400
++++ piCorePlayerMeta.lua	2017-10-03 09:22:54.338859000 -0400
+@@ -46,7 +46,7 @@
      		end,
      		100,
      		nil,
--    		jiveMain:getSkinParamOrNil('piCorePlayerStyle')
-+    		hm_settings
+-		icon
++		hm_settings
      	)
      )
  

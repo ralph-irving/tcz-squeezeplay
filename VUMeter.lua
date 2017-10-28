@@ -70,7 +70,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: 0dB FS',
+		LEGEND = '0 dB',
 		RMS_MAP =  {
 			    0,   81,  471,  667,  897, 1161, 1459, 1792, 2158, 2559, 2994, 3463,
 			 3965, 4502, 5073, 5678, 6318, 6991, 7698, 8439, 9215,10024,10868,11746,
@@ -78,7 +78,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -3dB FS',
+		LEGEND = '-3 dB',
 		RMS_MAP =  {
 			    0,   40,  235,  333,  448,  581,  730,  896, 1079, 1280, 1497, 1731,
 			 1983, 2251, 2537, 2839, 3159, 3495, 3849, 4220, 4607, 5012, 5434, 5873,
@@ -86,7 +86,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -6dB FS',
+		LEGEND = '-6 dB',
 		RMS_MAP =  {
 			    0,   20,  118,  167,  224,  290,  365,  448,  540,  640,  748,  866,
 			  991, 1126, 1268, 1420, 1579, 1748, 1925, 2110, 2304, 2506, 2717, 2936,
@@ -94,7 +94,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -9dB FS',
+		LEGEND = '-9 dB',
 		RMS_MAP =  {
 			    0,   10,   59,   83,  112,  145,  182,  224,  270,  320,  374,  433,
 			  496,  563,  634,  710,  790,  874,  962, 1055, 1152, 1253, 1359, 1468,
@@ -102,7 +102,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -12dB FS',
+		LEGEND = '-12 dB',
 		RMS_MAP =  {
 			    0,    5,   29,   42,   56,   73,   91,  112,  135,  160,  187,  216,
 			  248,  281,  317,  355,  395,  437,  481,  527,  576,  627,  679,  734,
@@ -110,7 +110,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -15dB FS',
+		LEGEND = '-15 dB',
 		RMS_MAP =  {
 			    0,    3,   15,   21,   28,   36,   46,   56,   67,   80,   94,  108,
 			  124,  141,  159,  177,  197,  218,  241,  264,  288,  313,  340,  367,
@@ -118,7 +118,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -18dB FS',
+		LEGEND = '-18 dB',
 		RMS_MAP =  {
 			    0,    1,    7,   10,   14,   18,   23,   28,   34,   40,   47,   54,
 			   62,   70,   79,   89,   99,  109,  120,  132,  144,  157,  170,  184,
@@ -126,7 +126,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -21dB FS',
+		LEGEND = '-21 dB',
 		RMS_MAP =  {
 			    0,    1,    4,    5,    7,    9,   11,   14,   17,   20,   23,   27,
 			   31,   35,   40,   44,   49,   55,   60,   66,   72,   78,   85,   92,
@@ -134,7 +134,7 @@ local RMS_MAPS = {
 		}
 	},
 	{
-		LEGEND = 'ref: -24dB FS',
+		LEGEND = '-24 dB',
 		RMS_MAP =  {
 			    0,    1,    2,    3,    4,    5,    6,    7,    8,   10,   12,   14,
 			   15,   18,   20,   22,   25,   27,   30,   33,   36,   39,   42,   46,
@@ -280,7 +280,7 @@ function _skin(self)
 	-- original script anticipated an NP style of 'vumeter_analog' for the
 	-- analogue VUMeter, and, apparently, 'vumeter' for an (unimplemented) bar
 	-- display
-	if self.style != "vumeter_analog" then
+	if self.style ~= "vumeter_analog" then
 		logUI:warn('Now Playing Style \'', self.style, '\' is not recognized')
 	end
 
@@ -293,13 +293,14 @@ function _skin(self)
 	--self.legend.font = Font:load("fonts/FreeSansBold.ttf", 12)
 
 	local WHITE      = 0xE7E7E7FF
+	local BLACK      = 0x00000000
 	--local OFFWHITE   = 0xDCDCDCFF
 	local BACKGROUND_TEAL_ALPHA = 0x00BEBEC0
 	self.legend.fg = WHITE
 	-- the margin that we place around the legend text on its background
 	self.legend.xborder = 3
 	self.legend.yborder = 1
-	self.legend.bg = BACKGROUND_TEAL_ALPHA
+	self.legend.bg = BLACK
 
 end
 
@@ -387,7 +388,7 @@ function _layout(self)
 	end
 
 	-- we only want a legend if there is, indeed, a legend available
-	if (current_LEGEND and (current_LEGEND:len() != 0)) then
+	if (current_LEGEND and (current_LEGEND:len() > 0)) then
 
 		-- draw the text
 		self.legend.textImg = Surface:drawText(self.legend.font, self.legend.fg, current_LEGEND)

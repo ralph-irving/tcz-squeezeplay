@@ -69,4 +69,4 @@ echo -e "Original-site:\thttps://github.com/ralph-irving/squeezeplay.git" >> $TC
 echo -e "Copying-policy:\tBSD" >> $TCZINFO
 echo -e "Size:\t\t$(ls -lk pcp-$SQUEEZEPLAY.tcz | awk '{print $5}')k" >> $TCZINFO
 echo -e "Extension_by:\tpiCorePlayer team: https://sites.google.com/site/picoreplayer" >> $TCZINFO
-echo -e "\t\tCompiled for piCore 8.x" >> $TCZINFO
+echo -e "\t\tCompiled for piCore 9.x" >> $TCZINFO

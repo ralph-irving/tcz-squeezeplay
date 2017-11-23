@@ -1,5 +1,5 @@
 ################################################################################
-# Squeezeplay makefile for picoreplayer raspberry pi armhf
+# Squeezeplay makefile for picoreplayer raspberry pi
 # Copyright 2007 Logitech
 # Copyright 2017 Ralph Irving
 ################################################################################
@@ -7,7 +7,7 @@
 # Additional packages required to build
 #
 # sudo apt-get install libasound2-dev
-# sudo apt-get install libreadline-gplv2-dev (armhf) / libreadline-dev (armel)
+# sudo apt-get install libreadline-gplv2-dev
 #
 # Checkout the touchscreen library.
 #
@@ -26,7 +26,7 @@ export BUILD_TOP=$(BASE_DIR)build/linux
 DESTDIR=${BUILD_TOP}
 export PREFIX=${DESTDIR}
 
-export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -s -O2 -fPIC -march=armv6 -mfloat-abi=hard -mfpu=vfp
+export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -s -O2
 export LDFLAGS=-s -L${PREFIX}/lib
 
 export TOOLPATH = $(shell dirname `which gcc`)
@@ -109,11 +109,10 @@ tslib: libts-1.0/Makefile
 
 # sdl
 SDL-1.2.15/Makefile:
-	cd SDL-1.2.15; ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --enable-audio=no --enable-video --enable-events --enable-joystick=no --enable-cdrom=no --enable-threads --enable-timers --enable-file --enable-loadso --enable-esd=no --enable-arts=no --enable-esd-shared=no --enable-clock_gettime --enable-video-x11=no --enable-video-opengl=no --enable-video-dummy=no --enable-video-directfb=no --enable-input-tslib=yes
+	cd SDL-1.2.15; ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --enable-audio=no --enable-video --enable-events --enable-joystick=no --enable-cdrom=no --enable-threads --enable-timers --enable-file --enable-loadso --enable-esd=no --enable-arts=no --enable-esd-shared=no --enable-clock_gettime --enable-video-x11=no --enable-video-opengl=no --enable-video-dummy=no --enable-video-directfb=no --enable-pulseaudio=no --enable-input-tslib=yes
 
 sdl: SDL-1.2.15/Makefile
 	cd SDL-1.2.15; make && make install
-	exit
 
 # sdl_image (requires jpeg tiff png)
 SDL_image-1.2.5/Makefile:
@@ -141,9 +140,9 @@ sdl-gfx: SDL_gfx-2.0.24/Makefile
 # lua
 #####
 
-.PHONY: lua-all lua luasocket slnunicode luacjson loop luaexpat luafilesystem luaprofiler luazipfilter luamd5
+.PHONY: lua-all lua luasocket slnunicode luajson loop luaexpat luafilesystem luaprofiler luazipfilter luamd5
 
-lua-all: lua tolua++ luasocket slnunicode luacjson loop luaexpat luafilesystem luaprofiler luazipfilter luamd5
+lua-all: lua tolua++ luasocket slnunicode luajson loop luaexpat luafilesystem luaprofiler luazipfilter luamd5
 
 # lua (requires readline ncurses)
 lua:
@@ -156,8 +155,11 @@ luasocket: lua
 slnunicode: lua
 	cd slnunicode-1.1; make install INSTALL_TOP=${PREFIX} TARGET=$(TARGET) PLATFORM=linux
 
-luacjson: lua
-	cd lua-cjson-2.1.0; make PREFIX=${PREFIX} && cp -p cjson.so ${PREFIX}/lib/lua/5.1/cjson.so
+luajson/Makefile:
+	cd luajson; ./configure --prefix=${PREFIX}
+
+luajson: luajson/Makefile
+	cd luajson; make && cp .libs/json.so ${PREFIX}/lib/lua/5.1/json.so
 
 luazipfilter/Makefile:
 	cd luazipfilter; ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
@@ -166,8 +168,8 @@ luazipfilter: luazipfilter/Makefile
 	cd luazipfilter; make && cp .libs/zipfilter.so ${PREFIX}/lib/lua/5.1/zipfilter.so
 
 luamd5:
-	cd luamd5; make LUA=${PREFIX} MYNAME=sha1
-	cd luamd5; make LUA=${PREFIX} MYNAME=md5
+	cd luamd5; make G="${CFLAGS}" LUA=${PREFIX} MYNAME=sha1 MYLDFLAGS="${LDFLAGS}"
+	cd luamd5; make G="${CFLAGS}" LUA=${PREFIX} MYNAME=md5 MYLDFLAGS="${LDFLAGS}"
 	cp luamd5/md5.so ${PREFIX}/lib/lua/5.1/md5.so
 	cp luamd5/sha1.so ${PREFIX}/lib/lua/5.1/sha1.so
 
@@ -197,7 +199,6 @@ tolua++: lua
 	mkdir -p ${PREFIX}/lib
 	install tolua++-1.0.92/include/tolua++.h ${PREFIX}/include
 	install tolua++-1.0.92/src/lib/libtolua++.so ${PREFIX}/lib
-
 
 #
 # squeezeplay
@@ -272,9 +273,7 @@ squeezeplay/Makefile:
 	cd squeezeplay; SDL_CONFIG=${SDL_CONFIG} ./configure ${ENABLE_SPPRIVATE} ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
 
 squeezeplay: squeezeplay/Makefile
-	patch -p1 -i squeezeplay-lua-cjson.patch
 	cd squeezeplay; make && make install
-	patch -p1 -R -i squeezeplay-lua-cjson.patch
 
 squeezeplay_desktop/Makefile:
 	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
@@ -345,7 +344,7 @@ clean:
 	-cd slnunicode-1.1; make clean PLATFORM=linux
 	-cd luaexpat-1.0.2; make clean PLATFORM=linux
 	-cd luafilesystem-1.2; make clean PLATFORM=linux
-	-cd lua-cjson-2.1.0; make clean
+	-cd luajson; make distclean
 	-cd luazipfilter; make distclean
 	-cd luaprofiler-2.0; make -f Makefile.linux clean
 	-cd luamd5; make MYNAME=sha1 clean

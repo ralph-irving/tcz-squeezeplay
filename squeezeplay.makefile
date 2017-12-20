@@ -122,11 +122,11 @@ sdl-image: SDL_image-1.2.5/Makefile
 	cd SDL_image-1.2.5; make && make install
 
 # sdl_ttf
-SDL_ttf-2.0.8/Makefile:
-	cd SDL_ttf-2.0.8; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --with-freetype-prefix=${PREFIX} --without-opengl
+SDL_ttf-2.0.11/Makefile:
+	cd SDL_ttf-2.0.11; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --with-freetype-prefix=${PREFIX} --without-opengl
 
-sdl-ttf: SDL_ttf-2.0.8/Makefile
-	cd SDL_ttf-2.0.8; make && make install
+sdl-ttf: SDL_ttf-2.0.11/Makefile
+	cd SDL_ttf-2.0.11; make && make install
 
 # sdl_gfx
 SDL_gfx-2.0.24/Makefile:
@@ -337,7 +337,7 @@ clean:
 	-cd libts-1.0; make distclean; rm -f Makefile
 	-cd SDL-1.2.15; make distclean; rm -f include/SDL_config.h sdl.pc;
 	-cd SDL_image-1.2.5; make distclean
-	-cd SDL_ttf-2.0.8; make distclean
+	-cd SDL_ttf-2.0.11; make distclean
 	-cd SDL_gfx-2.0.24; make distclean
 	-cd lua-5.1.1; make clean
 	-cd luasocket-2.0.2; make clean PLATFORM=linux

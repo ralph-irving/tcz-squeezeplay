@@ -1,5 +1,26 @@
---- piCorePlayerMeta.lua.orig	2017-06-15 10:45:45.000000000 -0400
-+++ piCorePlayerMeta.lua	2017-10-03 09:22:54.338859000 -0400
+--- piCorePlayerMeta.lua.orig	2018-10-18 10:29:20.000000000 -0400
++++ piCorePlayerMeta.lua	2019-07-21 14:42:57.014136200 -0400
+@@ -26,14 +26,14 @@
+ end
+ 
+ function configureApplet(self)
+-    local icon
++--  local icon
+     local skin = jiveMain:getDefaultSkin()
+ 
+-    if skin == 'JogglerSkin' or skin == 'PiGridSkin' then
+-        icon = jiveMain:getSkinParamOrNil('piCorePlayerStyle')
+-    else
+-        icon = 'hm_settings'
+-    end
++--  if skin == 'JogglerSkin' or skin == 'PiGridSkin' then
++--      icon = jiveMain:getSkinParamOrNil('piCorePlayerStyle')
++--  else
++--      icon = 'hm_settings'
++--  end
+ 
+ 	-- we only register the menu her, as registerApplet is being called before the skin is initialized
+     jiveMain:addItem(
 @@ -46,7 +46,7 @@
      		end,
      		100,

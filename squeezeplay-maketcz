@@ -3,8 +3,12 @@ SQUEEZEPLAY=squeezeplay
 TOPDIR=`pwd`
 BUILDDIR=${TOPDIR}/sp-build
 OUTPUT=${BUILDDIR}/opt/${SQUEEZEPLAY}
+BUILDDIRDEV=${TOPDIR}/sp-build-dev
+OUTPUTDEV=${BUILDDIRDEV}/opt/${SQUEEZEPLAY}
 TCZ=${TOPDIR}/pcp-${SQUEEZEPLAY}.tcz
 TCZINFO=${TCZ}.info
+TCZDEV=${TOPDIR}/pcp-${SQUEEZEPLAY}-dev.tcz
+TCZINFODEV=${TCZDEV}.info
 
 if [ -d $BUILDDIR ]; then
 	rm -rf $BUILDDIR
@@ -28,6 +32,7 @@ patch -p0 -i$OUTPUT/../../../squeezeplay-defaultjogglerskin.patch || exit 1
 
 rm share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/{vu_analog_25seq_b.png,vu_analog_25seq_w.png} || exit 1
 rm -rf share/jive/applets/BlankScreen || exit 1
+find share -type f -name '*\.orig' -exec rm {} \;
 cp -p $HOME/source/picoreplayer/tcz/jivelite/vu_analog_25seq_k.png share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_w.png || exit 1
 cp -p $HOME/source/picoreplayer/tcz/jivelite/pcp.png $OUTPUT/share/jive/jive/splash.png || exit 1
 
@@ -47,7 +52,7 @@ rm -f lib/libts*
 
 find lib -type f -name '*so*' -exec patchelf --set-rpath "/opt/squeezeplay/lib" {} \;
 patchelf --set-rpath "/opt/squeezeplay/lib:/usr/local/lib" lib/libSDL-1.2.so.0.11.4
-patchelf --set-rpath "/opt/squeezeplay/lib:/usr/local/lib" lib/libSDL_gfx.so.13.9.1
+patchelf --set-rpath "/opt/squeezeplay/lib:/usr/local/lib" lib/libSDL_gfx.so.0.0.15
 find bin -type f -exec patchelf --set-rpath "/opt/squeezeplay/lib" {} \;
 find bin -type f -exec strip --strip-unneeded {} \;
 cp -p $TOPDIR/${SQUEEZEPLAY}.sh bin/
@@ -58,8 +63,13 @@ if [ -f $TCZ ]; then
         rm $TCZ
 fi
 
-mksquashfs sp-build $TCZ -all-root -no-progress
+mksquashfs $BUILDDIR $TCZ -all-root -no-progress
 md5sum `basename $TCZ` > ${TCZ}.md5.txt
+
+cd $BUILDDIR
+find * -not -type d > ${TCZ}.list
+
+cd $TOPDIR
 
 echo -e "Title:\t\tpcp-$SQUEEZEPLAY.tcz" > $TCZINFO
 echo -e "Description:\tCommunity squeezebox controller and player." >> $TCZINFO
@@ -67,6 +77,36 @@ echo -e "Version:\t$(strings $OUTPUT/bin/jive | grep 7\.8\.0)" >> $TCZINFO
 echo -e "Authors:\tSee About in advanced settings, Ralph Irving, Michael Herger" >> $TCZINFO
 echo -e "Original-site:\thttps://github.com/ralph-irving/squeezeplay.git" >> $TCZINFO
 echo -e "Copying-policy:\tBSD" >> $TCZINFO
-echo -e "Size:\t\t$(ls -lk pcp-$SQUEEZEPLAY.tcz | awk '{print $5}')k" >> $TCZINFO
-echo -e "Extension_by:\tpiCorePlayer team: https://sites.google.com/site/picoreplayer" >> $TCZINFO
-echo -e "\t\tCompiled for piCore 9.x" >> $TCZINFO
+echo -e "Size:\t\t$(ls -lk pcp-$SQUEEZEPLAY.tcz | awk '{print $5}')" >> $TCZINFO
+echo -e "Extension_by:\tpiCorePlayer team: https://www.picoreplayer.org" >> $TCZINFO
+echo -e "\t\tCompiled for piCore 10.2" >> $TCZINFO
+
+if [ -f $TCZDEV ]; then
+        rm $TCZDEV
+fi
+
+if [ -d $BUILDDIRDEV ]; then
+	rm -rf $BUILDDIRDEV
+fi
+
+mkdir -p $OUTPUTDEV || exit 1
+
+tar -x -C $OUTPUTDEV -f ${TOPDIR}/squeezeplay-7.8.0.tgz include/{expat.h,expat_external.h,lauxlib.h,ltconf.h,lua.h,luaconf.h,lualib.h,freetype2,libpng12,SDL,ft2build.h,jconfig.h,jerror.h,jmorecfg.h,jpeglib.h,png.h,pngconf.h}
+
+mksquashfs $BUILDDIRDEV $TCZDEV -all-root -no-progress
+md5sum `basename $TCZDEV` > ${TCZDEV}.md5.txt
+
+cd $BUILDDIRDEV
+find * -not -type d > ${TCZDEV}.list
+
+cd $TOPDIR
+
+echo -e "Title:\t\tpcp-$SQUEEZEPLAY-dev.tcz" > $TCZINFODEV
+echo -e "Description:\tCommunity squeezebox controller and player header files." >> $TCZINFODEV
+echo -e "Version:\t$(strings $OUTPUT/bin/jive | grep 7\.8\.0)" >> $TCZINFODEV
+echo -e "Authors:\tSee About in advanced settings, Ralph Irving, Michael Herger" >> $TCZINFODEV
+echo -e "Original-site:\thttps://github.com/ralph-irving/squeezeplay.git" >> $TCZINFODEV
+echo -e "Copying-policy:\tBSD" >> $TCZINFODEV
+echo -e "Size:\t\t$(ls -lk pcp-$SQUEEZEPLAY-dev.tcz | awk '{print $5}')" >> $TCZINFODEV
+echo -e "Extension_by:\tpiCorePlayer team: https://www.picoreplayer.org" >> $TCZINFODEV
+echo -e "\t\tCompiled for piCore 10.2" >> $TCZINFODEV

@@ -1,56 +1,56 @@
 #!/bin/sh
 
-##
-## This script is a basic startup script for the SqueezePlay binary (jive) that requires a few environment variables be set.
-##
+if [ -f /usr/local/sbin/config.cfg ]; then
+	source /usr/local/sbin/config.cfg
+fi
 
-## Change these if you changed your install path
-INSTALL_DIR=/opt/squeezeplay
-LIB_DIR=$INSTALL_DIR/lib
-INC_DIR=$INSTALL_DIR/include
+eventno=$(cat /proc/bus/input/devices | awk '/FT5406 memory based driver/{for(a=0;a>=0;a++){getline;{if(/mouse/==1){ print $NF;exit 0;}}}}')
+if [ x"" != x"$eventno" ];then            
+    export JIVE_NOCURSOR=1 
+    export TSLIB_TSDEVICE=/dev/input/$eventno
+    export SDL_MOUSEDRV=TSLIB
+    export SDL_MOUSEDEV=$TSLIB_TSDEVICE
+else
+	unset JIVE_NOCURSOR
+	unset SDL_MOUSEDRV
+	unset SDL_MOUSEDEV
+fi                         
 
-## Start up
-export LD_LIBRARY_PATH=$LIB_DIR:$LD_LIBRARY_PATH
-export LD_INCLUDE_PATH=$INC_DIR:$LD_INCLUDE_PATH
-export PATH=$PATH:$INSTALL_DIR/bin:/usr/sbin:/sbin
+export LOG=/var/log/jivelite.log
+export HOME=/home/tc
+export JIVE_FRAMERATE=22
 
-#
-# ALSA
-#
-# Supported sample sizes 0=autodetect, default=16
-# "<0|16|24|24_3|32>"
-#
-export USEALSASAMPLESIZE=0
-# export USEALSADEVICE=default
-# export USEALSACAPTURE=default
-# export USEALSAEFFECTS=null
-# export USEALSAPCMTIMEOUT=500
-# export USEALSABUFFERTIME=30000
-# export USEALSAPERIODCOUNT=3
-# export USEALSANOMMAP=null
-#
-# Allow screensaver to start
-#
-export SDL_VIDEO_ALLOW_SCREENSAVER=1
-#
 # Define custom JogglerSkin size
-#
 # export JL_SCREEN_WIDTH=800
 # export JL_SCREEN_HEIGHT=480
 
-eventno=$(cat /proc/bus/input/devices | awk '/FT5406 memory based driver/{for(a=0;a>=0;a++){getline;{if(/mouse/==1){ print $NF;exit 0;}}}}')
+/usr/sbin/fbset -depth 32 >> $LOG 2>&1
 
-export HOME=/home/tc
-
-export JIVE_NOCURSOR=1
-
-export TSLIB_TSDEVICE=/dev/input/$eventno
-export SDL_MOUSEDRV=TSLIB
-export SDL_MOUSEDEV=$TSLIB_TSDEVICE
+set | grep TS >> $LOG 2>&1
+echo $OUTPUT >> $LOG 2>&1            
 
 while true; do
-sleep 3
-cd $INSTALL_DIR/bin
-./jive > /dev/null 2>&1
-done
+    sleep 3
 
+    if [ -x /opt/squeezeplay/bin/jive ]; then
+
+	/usr/local/etc/init.d/squeezelite stop >> $LOG 2>&1
+
+	if [ ! -z "$OUTPUT" ]; then
+		export USEALSADEVICE=$OUTPUT
+		export USEALSACAPTURE=$OUTPUT
+	else
+		export USEALSADEVICE=hw:CARD=ALSA
+		export USEALSACAPTURE=hw:CARD=ALSA
+	fi
+
+	export USEALSASAMPLESIZE=0
+	export USEALSABUFFERTIME=100000
+	export USEALSAPERIODCOUNT=4
+
+	cd /opt/squeezeplay/bin
+	./jive >> $LOG 2>&1
+    else
+        /opt/jivelite/bin/jivelite >> $LOG 2>&1
+    fi
+done

@@ -1,15 +1,14 @@
 ################################################################################
-# Squeezeplay makefile for picoreplayer raspberry pi
+# Squeezeplay makefile for picoreplayer raspberry pi armhf
 # Copyright 2007 Logitech
-# Copyright 2017 Ralph Irving
+# Copyright 2019 Ralph Irving
 ################################################################################
 
 # Additional packages required to build
 #
-# sudo apt-get install libasound2-dev
-# sudo apt-get install libreadline-gplv2-dev
+# tce-load -i compiletc squashfs-tools readline-dev libasound-dev patchelf svnclient
 #
-# Checkout the touchscreen library.
+# Checkout the touchscreen library
 #
 # svn checkout https://github.com/ralph-irving/tcz-libts.git/trunk/libts-1.0
 #
@@ -26,14 +25,16 @@ export BUILD_TOP=$(BASE_DIR)build/linux
 DESTDIR=${BUILD_TOP}
 export PREFIX=${DESTDIR}
 
-export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -s -O2
+export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -O2 -s -pipe -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp
+export CXXFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -O2 -s -pipe -fno-exceptions -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp
 export LDFLAGS=-s -L${PREFIX}/lib
 
 export TOOLPATH = $(shell dirname `which gcc`)
 
 export SDL_CONFIG = ${BUILD_TOP}/bin/sdl-config
 
-ENABLE_PROFILING=--enable-shared=yes --enable-static=no
+BUILD=armv7l-unknown-linux-gnu
+ENABLE_SHAREDLIBS=--build=${BUILD} --enable-shared=yes --enable-static=no
 USE_MMX=--disable-mmx
 
 # Override to yes to build closed source squeezeplay libraries 
@@ -73,67 +74,67 @@ zlib: zlib-1.2.7/Makefile
 
 # expat
 expat-2.0.1/Makefile:
-	cd expat-2.0.1; ./configure --prefix=${PREFIX} ${ENABLE_PROFILING}
+	cd expat-2.0.1; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 expat: expat-2.0.1/Makefile
 	cd expat-2.0.1; make; make prefix=${PREFIX} install
 
 # freetype
-freetype-2.1.10/config.mk:
-	cd freetype-2.1.10; ./configure ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
+freetype-2.4.2/config.mk:
+	cd freetype-2.4.2; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
-freetype: freetype-2.1.10/config.mk
-	cd freetype-2.1.10; make; make install
+freetype: freetype-2.4.2/config.mk
+	cd freetype-2.4.2; make; make install
 
 # png
-libpng-1.2.32/Makefile:
-	cd libpng-1.2.32; ./configure --enable-static=no --prefix=${PREFIX}
+libpng-1.2.59/Makefile:
+	cd libpng-1.2.59; ./configure --enable-static=no --prefix=${PREFIX}
 
-libpng: libpng-1.2.32/Makefile
-	cd libpng-1.2.32; make && make install
+libpng: libpng-1.2.59/Makefile
+	cd libpng-1.2.59; make && make install
 
 # jpeg
-jpeg-6b/Makefile:
+jpeg-9c/Makefile:
 	-mkdir -p ${BUILD_TOP}/man/man1
-	cd jpeg-6b; ./configure --enable-shared --prefix=${PREFIX}
+	cd jpeg-9c; ./configure --enable-shared --prefix=${PREFIX}
 
-libjpeg: jpeg-6b/Makefile
-	cd jpeg-6b; make && make install
+libjpeg: jpeg-9c/Makefile
+	cd jpeg-9c; make && make install
 
 # tslib
 libts-1.0/Makefile:
-	cd libts-1.0; ./autogen.sh; ./configure --prefix=${PREFIX} --enable-shared=yes --enable-static=no
+	cd libts-1.0; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 tslib: libts-1.0/Makefile
 	cd libts-1.0; make && make install
 
 # sdl
 SDL-1.2.15/Makefile:
-	cd SDL-1.2.15; ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --enable-audio=no --enable-video --enable-events --enable-joystick=no --enable-cdrom=no --enable-threads --enable-timers --enable-file --enable-loadso --enable-esd=no --enable-arts=no --enable-esd-shared=no --enable-clock_gettime --enable-video-x11=no --enable-video-opengl=no --enable-video-dummy=no --enable-video-directfb=no --enable-pulseaudio=no --enable-input-tslib=yes
+	cd SDL-1.2.15; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS} --enable-audio=no --enable-video --enable-events --enable-joystick=no --enable-cdrom=no --enable-threads --enable-timers --enable-file --enable-loadso --enable-esd=no --enable-arts=no --enable-esd-shared=no --enable-clock_gettime --enable-video-x11=no --enable-video-opengl=no --enable-video-dummy=no --enable-video-directfb=no --enable-pulseaudio=no --enable-input-tslib=yes
 
 sdl: SDL-1.2.15/Makefile
 	cd SDL-1.2.15; make && make install
 
 # sdl_image (requires jpeg tiff png)
 SDL_image-1.2.5/Makefile:
-	cd SDL_image-1.2.5; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure --disable-tif  --host=${HOST} --target=${TARGET} ${ENABLE_PROFILING} --prefix=${PREFIX} ${LIBPNG} ${LIBJPEG}
+	cd SDL_image-1.2.5; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS} --disable-tif ${LIBPNG} ${LIBJPEG}
 
 sdl-image: SDL_image-1.2.5/Makefile
 	cd SDL_image-1.2.5; make && make install
 
 # sdl_ttf
 SDL_ttf-2.0.11/Makefile:
-	cd SDL_ttf-2.0.11; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --with-freetype-prefix=${PREFIX} --without-opengl
+	cd SDL_ttf-2.0.11; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS} --with-freetype-prefix=${PREFIX} --without-opengl
 
 sdl-ttf: SDL_ttf-2.0.11/Makefile
 	cd SDL_ttf-2.0.11; make && make install
 
 # sdl_gfx
-SDL_gfx-2.0.24/Makefile:
-	cd SDL_gfx-2.0.24; ./configure ${ENABLE_PROFILING} ${USE_MMX} --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
+SDL_gfx-2.0.15/Makefile:
+	cd SDL_gfx-2.0.15; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS} ${USE_MMX}
 
-sdl-gfx: SDL_gfx-2.0.24/Makefile
-	cd SDL_gfx-2.0.24; make && make install
+sdl-gfx: SDL_gfx-2.0.15/Makefile
+	cd SDL_gfx-2.0.15; make && make install
 
 
 #####
@@ -162,7 +163,7 @@ luajson: luajson/Makefile
 	cd luajson; make && cp .libs/json.so ${PREFIX}/lib/lua/5.1/json.so
 
 luazipfilter/Makefile:
-	cd luazipfilter; ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
+	cd luazipfilter; ./configure --prefix=${PREFIX}
 
 luazipfilter: luazipfilter/Makefile
 	cd luazipfilter; make && cp .libs/zipfilter.so ${PREFIX}/lib/lua/5.1/zipfilter.so
@@ -190,7 +191,7 @@ luafilesystem:
 	cd luafilesystem-1.2 && make install PREFIX=${PREFIX} PLATFORM=linux
 
 luaprofiler:
-	cd luaprofiler-2.0 && make -f Makefile.linux install
+	cd luaprofiler-2.0.2 && make -f Makefile.linux install
 
 # just compile the library for to tolua++
 .PHONY: tolua++
@@ -204,26 +205,32 @@ tolua++: lua
 # squeezeplay
 #
 
-.PHONY: app portaudio libogg flac libmad tremor squeezeplay squeezeplay_desktop squeezeplay_contrib squeezeplay_private freefont freefont-debian axtls rtmp
-app: portaudio libogg flac libmad tremor ${SPPRIVATE_TARGETS} squeezeplay squeezeplay_desktop squeezeplay_contrib freefont rtmp squeezeplay-tgz 
+.PHONY: app fdkaac libogg flac libmad tremor squeezeplay squeezeplay_desktop squeezeplay_contrib squeezeplay_private freefont freefont-debian axtls rtmp
+app: fdkaac libogg flac libmad tremor ${SPPRIVATE_TARGETS} squeezeplay squeezeplay_desktop squeezeplay_contrib freefont rtmp squeezeplay-tgz 
 
 # portaudio
 portaudio_v19_1360/Makefile:
-	cd portaudio_v19_1360; ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --with-jack=no --enable-shared=no
+	cd portaudio_v19_1360; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS} --with-jack=no
 
 portaudio: portaudio_v19_1360/Makefile
 	cd portaudio_v19_1360; make && make install
 
+fdk-aac-2.0.0/Makefile:
+	cd fdk-aac-2.0.0; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
+
+fdkaac: fdk-aac-2.0.0/Makefile
+	cd fdk-aac-2.0.0; make; make install
+
 # libogg
 libogg-1.2.2/Makefile:
-	cd libogg-1.2.2; ./configure --prefix=${PREFIX} ${ENABLE_PROFILING}
+	cd libogg-1.2.2; ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 libogg: libogg-1.2.2/Makefile
 	cd libogg-1.2.2; make && make install
 
 # flac
 flac-1.2.1/Makefile:
-	cd flac-1.2.1; ./configure --enable-shared=no --disable-oggtest --disable-cpplibs --disable-xmms-plugin --with-ogg-libraries=${PREFIX}/lib --with-ogg-includes=${PREFIX}/include --prefix=${PREFIX} ${ENABLE_PROFILING}
+	cd flac-1.2.1; ./configure --disable-oggtest --disable-cpplibs --disable-xmms-plugin --with-ogg-libraries=${PREFIX}/lib --with-ogg-includes=${PREFIX}/include --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 flac: flac-1.2.1/Makefile
 	cd flac-1.2.1; make && make install
@@ -238,7 +245,7 @@ generated/${LIBMAD_DIR}/Makefile.am:
 generated/${LIBMAD_DIR}/Makefile: generated/${LIBMAD_DIR}/Makefile.am
 	cd generated/${LIBMAD_DIR}; patch -p1 -i ../../libmad-forcemem.patch
 	cd generated/${LIBMAD_DIR}; patch -p1 -i ../../libmad-i486.patch
-	cd generated/${LIBMAD_DIR}; ./configure --enable-fpm=arm --prefix=${PREFIX} ${ENABLE_PROFILING}
+	cd generated/${LIBMAD_DIR}; ./configure --enable-fpm=arm --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 libmad: generated/${LIBMAD_DIR}/Makefile.am generated/${LIBMAD_DIR}/Makefile
 	cd generated/${LIBMAD_DIR}; make && make install
@@ -246,7 +253,7 @@ libmad: generated/${LIBMAD_DIR}/Makefile.am generated/${LIBMAD_DIR}/Makefile
 
 # ogg
 Tremor/Makefile:
-	cd Tremor; CFLAGS="-DSQUEEZEPLAY ${CFLAGS}" ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX} ${ENABLE_PROFILING}
+	cd Tremor; CFLAGS="-DSQUEEZEPLAY ${CFLAGS}" ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 tremor: Tremor/Makefile
 	cd Tremor; make && make install
@@ -267,16 +274,15 @@ rtmp: squeezeplay
 	cd luartmp-squeezeplay; make
 	cp luartmp-squeezeplay/rtmp.so ${PREFIX}/lib/lua/5.1/rtmp.so 
 
-
 # squeezeplay
 squeezeplay/Makefile:
-	cd squeezeplay; SDL_CONFIG=${SDL_CONFIG} ./configure ${ENABLE_SPPRIVATE} ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
+	cd squeezeplay; SDL_CONFIG=${SDL_CONFIG} ./configure ${ENABLE_SPPRIVATE} --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 squeezeplay: squeezeplay/Makefile
 	cd squeezeplay; make && make install
 
 squeezeplay_desktop/Makefile:
-	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
+	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --prefix=${PREFIX} ${ENABLE_SHAREDLIBS}
 
 squeezeplay_desktop: squeezeplay_desktop/Makefile
 	cd squeezeplay_desktop; make install
@@ -289,7 +295,7 @@ squeezeplay_contrib: squeezeplay/Makefile
 	cd squeezeplay_contrib; make PREFIX=${PREFIX}
 
 squeezeplay_private/Makefile:
-	cd squeezeplay_private; SDL_CONFIG=${SDL_CONFIG} ./configure --host=${HOST} --target=${TARGET} --prefix=${PREFIX} --enable-wma --enable-aac
+	cd squeezeplay_private; SDL_CONFIG=${SDL_CONFIG} ./configure --prefix=${PREFIX} --enable-wma --enable-aac
 
 squeezeplay_private: squeezeplay_private/Makefile
 	cd squeezeplay_private; make PREFIX=${PREFIX} install
@@ -331,14 +337,14 @@ clean_generated:
 clean:
 	-cd zlib-1.2.7; make distclean; rm -f Makefile
 	-cd expat-2.0.1; make distclean
-	-cd freetype-2.1.10; make distclean
-	-cd libpng-1.2.32; make distclean
-	-cd jpeg-6b; make distclean
+	-cd freetype-2.4.2; make distclean
+	-cd libpng-1.2.59; make distclean
+	-cd jpeg-9c; make distclean
 	-cd libts-1.0; make distclean; rm -f Makefile
 	-cd SDL-1.2.15; make distclean; rm -f include/SDL_config.h sdl.pc;
 	-cd SDL_image-1.2.5; make distclean
 	-cd SDL_ttf-2.0.11; make distclean
-	-cd SDL_gfx-2.0.24; make distclean
+	-cd SDL_gfx-2.0.15; make distclean
 	-cd lua-5.1.5; make clean
 	-cd luasocket-2.0.2; make clean PLATFORM=linux
 	-cd slnunicode-1.1; make clean PLATFORM=linux
@@ -346,11 +352,12 @@ clean:
 	-cd luafilesystem-1.2; make clean PLATFORM=linux
 	-cd luajson; make distclean
 	-cd luazipfilter; make distclean
-	-cd luaprofiler-2.0; make -f Makefile.linux clean
+	-cd luaprofiler-2.0.2; make -f Makefile.linux clean
 	-cd luamd5; make MYNAME=sha1 clean
 	-cd luamd5; make MYNAME=md5 clean
 	-cd tolua++-1.0.92/src/lib; rm libtolua++.so; rm *.o
 	-cd portaudio_v19_1360; make distclean; rmdir src/os/mac_osx
+	-cd fdk-aac-2.0.0; make distclean
 	-cd libogg-1.2.2; make distclean
 	-cd Tremor; make distclean
 	-cd flac-1.2.1; make distclean; rm src/libFLAC++/flac++.pc; find . -type f -name Makefile -exec rm {} \; ; find . -type d -name '.deps' -exec rm -rf {} \;
